@@ -196,8 +196,8 @@ const createWindow = (): void => {
             "script-src 'self' 'unsafe-inline'",
             // Styles: allow same-origin + inline styles (required by dynamic theming) / 样式：允许同源和内联样式（动态主题需要）
             "style-src 'self' 'unsafe-inline'",
-            // Images: allow same-origin, data URIs, local files, and blobs (required by preview features) / 图片：允许同源、data URI、本地文件和 blob（预览功能需要）
-            "img-src 'self' data: file: blob:",
+            // Images: allow same-origin, data URIs, local files, blobs, and HTTPS (required by preview features and custom backgrounds) / 图片：允许同源、data URI、本地文件、blob 和 HTTPS（预览功能和自定义背景需要）
+            "img-src 'self' data: file: blob: https:",
             // Fonts: allow same-origin and data URIs / 字体：允许同源和 data URI
             "font-src 'self' data:",
             // Network connections: allow same-origin, WebSocket, and localhost (required by WebUI mode) / 网络连接：允许同源、WebSocket 和 localhost（WebUI 模式需要）
