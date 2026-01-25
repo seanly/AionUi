@@ -4,9 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Copy as CopyIcon } from '@icon-park/react';
+import { Copy } from '@icon-park/react';
+import { Dropdown, Menu } from '@arco-design/web-react';
 import { iconColors } from '@/renderer/theme/colors';
 
 type MenuState = {
@@ -17,8 +18,6 @@ type MenuState = {
 };
 
 type RectLike = { left: number; right: number; top: number; bottom: number };
-
-const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
 
 const getInputSelectionText = (target: EventTarget | null): string => {
   if (!(target instanceof HTMLElement)) return '';
@@ -69,28 +68,12 @@ const copyWithExecCommandFallback = (text: string): boolean => {
 
 const SelectionContextMenu: React.FC = () => {
   const { t } = useTranslation();
-  const menuRef = useRef<HTMLDivElement | null>(null);
   const lastRightClickRef = useRef<{ at: number; text: string; rects: RectLike[] } | null>(null);
   const [state, setState] = useState<MenuState>({ visible: false, x: 0, y: 0, text: '' });
 
   const close = () => {
     setState((prev) => (prev.visible ? { ...prev, visible: false } : prev));
   };
-
-  const menuStyle = useMemo<React.CSSProperties>(() => {
-    // Keep the menu inside viewport.
-    const padding = 8;
-    const menuWidth = 160;
-    const menuHeight = 44;
-    const x = clamp(state.x, padding, window.innerWidth - padding - menuWidth);
-    const y = clamp(state.y, padding, window.innerHeight - padding - menuHeight);
-    return {
-      position: 'fixed',
-      left: x,
-      top: y,
-      zIndex: 99999,
-    };
-  }, [state.x, state.y]);
 
   useEffect(() => {
     const onMouseDownCapture = (e: MouseEvent) => {
@@ -141,7 +124,7 @@ const SelectionContextMenu: React.FC = () => {
       }
 
       if (!shouldIntercept || !selectedText) {
-        close();
+        if (state.visible) close();
         return;
       }
 
@@ -156,14 +139,6 @@ const SelectionContextMenu: React.FC = () => {
       });
     };
 
-    const onMouseDown = (e: MouseEvent) => {
-      if (!state.visible) return;
-      const el = menuRef.current;
-      if (el && e.target instanceof Node && !el.contains(e.target)) {
-        close();
-      }
-    };
-
     const onKeyDown = (e: KeyboardEvent) => {
       if (!state.visible) return;
       if (e.key === 'Escape') close();
@@ -173,20 +148,22 @@ const SelectionContextMenu: React.FC = () => {
       if (state.visible) close();
     };
 
+    const onWindowResize = () => {
+      if (state.visible) close();
+    };
+
     document.addEventListener('mousedown', onMouseDownCapture, true);
     document.addEventListener('contextmenu', onContextMenu, true);
-    document.addEventListener('mousedown', onMouseDown, true);
     document.addEventListener('keydown', onKeyDown, true);
-    window.addEventListener('resize', onScroll);
     window.addEventListener('scroll', onScroll, true);
+    window.addEventListener('resize', onWindowResize);
 
     return () => {
       document.removeEventListener('mousedown', onMouseDownCapture, true);
       document.removeEventListener('contextmenu', onContextMenu, true);
-      document.removeEventListener('mousedown', onMouseDown, true);
       document.removeEventListener('keydown', onKeyDown, true);
-      window.removeEventListener('resize', onScroll);
       window.removeEventListener('scroll', onScroll, true);
+      window.removeEventListener('resize', onWindowResize);
     };
   }, [state.visible]);
 
@@ -205,15 +182,51 @@ const SelectionContextMenu: React.FC = () => {
     copyWithExecCommandFallback(text);
   };
 
-  if (!state.visible) return null;
+  const isMac = /Mac|iPod|iPhone|iPad/.test(navigator.platform);
+  const shortcut = isMac ? '⌘C' : 'Ctrl+C';
 
+  const droplist = (
+    <Menu
+      selectable={false}
+      onClickMenuItem={(key) => {
+        if (key === 'copy') void onCopy();
+      }}
+      className='select-none'
+    >
+      <Menu.Item key='copy'>
+        <div className='flex items-center gap-10px min-w-[120px]'>
+          <Copy theme='outline' size='16' fill={iconColors.secondary} />
+          <span className='flex-1'>{t('common.copy', { defaultValue: 'Copy' })}</span>
+          <span className='text-[color:var(--color-text-3)] text-12px ml-16px'>{shortcut}</span>
+        </div>
+      </Menu.Item>
+    </Menu>
+  );
+
+  // Always render the anchor so Dropdown has a target, but control visibility via popupVisible.
   return (
-    <div ref={menuRef} style={menuStyle} className='bg-1 border border-solid border-[color:var(--border-base)] rd-10px shadow-lg min-w-180px select-none overflow-hidden'>
-      <button type='button' onClick={onCopy} className='w-full text-left px-12px py-10px flex items-center gap-10px hover:bg-fill-2 text-[color:var(--color-text-1)] text-13px'>
-        <CopyIcon theme='outline' size='16' fill={iconColors.secondary} />
-        <span className='flex-1'>{t('common.copy', { defaultValue: 'Copy' })}</span>
-      </button>
-    </div>
+    <Dropdown
+      droplist={droplist}
+      popupVisible={state.visible}
+      onVisibleChange={(visible) => {
+        if (!visible) close();
+      }}
+      trigger='click'
+      position='bl'
+      getPopupContainer={() => document.body}
+    >
+      <div
+        style={{
+          position: 'fixed',
+          left: state.x,
+          top: state.y,
+          width: 1,
+          height: 1,
+          pointerEvents: 'none',
+          visibility: 'hidden',
+        }}
+      />
+    </Dropdown>
   );
 };
 
