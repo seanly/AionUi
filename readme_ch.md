@@ -34,7 +34,7 @@
 </p>
 
 <p align="center">
-  <strong>💬 社区：</strong> <a href="https://discord.gg/g6u66vV9" target="_blank">Discord (English)</a> | <a href="./resources/wechat_group.png" target="_blank">微信 (中文群)</a>
+  <strong>💬 社区：</strong> <a href="https://discord.gg/2QAwJn7Egx" target="_blank">Discord (English)</a> | <a href="./resources/wechat_group_2.jpg" target="_blank">微信 (中文群)</a>
 </p>
 
 ---
@@ -69,6 +69,22 @@ _AionUi 内置 Gemini CLI，下载即用，无需额外安装；如果你已经�
 <p align="center">
   <img src="./resources/acp home page.gif" alt="多代理模式演示" width="800">
 </p>
+
+---
+
+### 🌐 **随时随地访问 - WebUI 模式**
+
+_你的 7×24 小时 AI 助手 - 从网络中的任何设备访问 AionUi！出差、在家、办公室，随时随地使用你的 AI 工具_
+
+**✨ 一键启动**：在设置面板中打开 WebUI 选项，点击开关即可启动！
+
+- ✅ **跨设备访问** - 手机、平板、电脑，任何设备都能访问
+- ✅ **远程协作** - 支持局域网、跨网络、服务器部署等多种场景
+- ✅ **安全可靠** - 密码管理、二维码登录，数据不离开你的设备
+
+> 💡 **需要详细配置指南？** 查看 [WebUI 配置教程](https://github.com/iOfficeAI/AionUi/wiki/WebUI-Configuration-Guide-Chinese) 和 [远程外网连接教程](https://github.com/iOfficeAI/AionUi/wiki/Remote-Internet-Access-Guide-Chinese)
+
+https://github.com/user-attachments/assets/c81b7826-30ea-405e-86db-7d6a503c533b
 
 ---
 
@@ -124,27 +140,7 @@ _开多个对话、任务不混乱、记忆独立、效率翻倍_
 
 ---
 
-### 🌐 **随时随地访问 - WebUI 模式**
-
-_远程控制您的 AI 工具 - 从网络中的任何设备访问 AionUi！安全控制本地 Gemini CLI、Claude Code、Codex 等工具，数据不离开您的设备_
-
-```bash
-# 基本启动
-AionUi --webui
-
-# 远程访问（局域网内其他设备可访问）
-AionUi --webui --remote
-```
-
-> 💡 **需要详细配置指南？** 查看 [WebUI 配置教程](https://github.com/iOfficeAI/AionUi/wiki/WebUI-Configuration-Guide-Chinese) - 包含各平台完整启动命令
-
-<p align="center">
-  <img src="./resources/webui banner.png" alt="WebUI 远程访问演示" width="800">
-</p>
-
----
-
-## 🤔 为什么选择 AionUi？
+## 🤔 为什么选择 AionUi？ | 像 Claudebot 一样好用
 
 **就像 Claude Cowork 让 Claude Code 更易用，AionUi 是你所有命令行 AI 工具的 Cowork 平台**
 
@@ -154,7 +150,8 @@ AionUi 为这些命令行工具提供统一的 **Cowork 能力**：
 
 - 🎯 **统一平台** - 一个界面管理所有命令行 AI 工具，无需切换；内置 Gemini CLI，下载即用且完全免费
 - 🚀 **多工具支持** - 不仅支持 Claude Code，还支持 Gemini CLI、Codex、Qwen Code 等
-- 🌐 **跨平台** - macOS、Windows、Linux 全平台支持（Claude Cowork 目前仅 macOS）
+- 🖥️ **跨平台** - macOS、Windows、Linux 全平台支持（Claude Cowork 目前仅 macOS）
+- 🌐 **远程访问** - 你的 24/7 AI 助手，随时随地访问，完全免费（Claude Cowork 无远程访问功能）
 - 🔄 **多模型切换** - 在同一个界面中灵活切换不同模型，满足不同任务需求
 - 📄 **实时预览** - 9+ 种格式可视化预览，AI 生成的文件立即查看效果
 - 💾 **本地数据安全** - 所有对话和文件保存在本地，数据不离开你的设备
@@ -227,7 +224,13 @@ _观看创作者们如何测评和使用 AionUi_
   <em>🎬 WorldofAI (20万订阅)</em> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <em>🎬 Julian Goldie SEO (31.8万订阅)</em>
 </p>
 
-> 💡 **你也做了关于 AionUi 的视频？** [在 X 上告诉我们](https://x.com/AionUi)，我们会在这里展示！我们也会采纳你的反馈，并在未来持续优化。
+### 📰 社区文章
+
+- [爆火！开源免费版 Cowork，全模型接入+文件自主操作，重新定义 AI 办公。](https://mp.weixin.qq.com/s/F3f-CCsVPaK3lK00jXhOOg) — 开源AI项目落地
+- [让普通人也能像用 APP 一样用上 Claude Code，ACP 协议是什么](https://mp.weixin.qq.com/s/TsMojSbkUUFvsd-HQCazZg) — 懒猫爱摸鱼
+- [5500星：开源如何撬动 Anthropic 的 AI 工具护城河](https://mp.weixin.qq.com/s/saEk49cYV6MqBgw19Lw6Gw) — AI硅基时刻
+
+> 💡 **你也做了关于 AionUi 的视频或文章？** [在 X 上告诉我们](https://x.com/AionUi)，我们会在这里展示！也会采纳你的反馈，并在未来持续优化。
 
 ---
 
@@ -237,6 +240,12 @@ _观看创作者们如何测评和使用 AionUi_
 
 - **多会话 + 独立上下文** - 同时开多个聊天，每个会话拥有独立的上下文记忆，互不混淆
 - **本地保存** - 所有对话都保存在本地，不会丢失
+
+### 🌐 **WebUI 远程访问 - 你的 24/7 AI 助手**
+
+- **跨设备访问** - 通过网络中的任何设备通过浏览器访问，支持移动端
+- **随时随地** - 出差、在家、办公室，7×24 小时随时访问你的 AI 工具，完全免费
+- **本地数据安全** - 所有数据使用 SQLite 数据库本地存储，适合服务器部署
 
 ### 🤖 **多模型支持**
 
@@ -258,11 +267,6 @@ _观看创作者们如何测评和使用 AionUi_
 
 - **智能图像生成** - 支持 Gemini 2.5 Flash Image Preview、Nano、Banana 等多种图像生成模型
 - **图像识别与编辑** - AI 驱动的图像分析和编辑功能
-
-### 🌐 **WebUI 远程访问**
-
-- **跨设备访问** - 通过网络中的任何设备通过浏览器访问，支持移动端
-- **本地数据安全** - 所有数据使用 SQLite 数据库本地存储，适合服务器部署
 
 ### 🎨 **个性化界面定制**
 
@@ -357,8 +361,8 @@ brew install aionui
 - [💬 GitHub Discussions](https://github.com/iOfficeAI/AionUi/discussions) - **分享想法、提出建议、交流使用心得**
 - [🐛 报告问题](https://github.com/iOfficeAI/AionUi/issues) - 反馈 Bug 或功能请求
 - [📦 发布更新](https://github.com/iOfficeAI/AionUi/releases) - 获取最新版本
-- [💬 Discord Community](https://discord.gg/g6u66vV9) - **加入我们的英文 Discord 社区**
-- [💬 微信 (中文群)](./resources/wechat_group.png) - **点击查看二维码**
+- [💬 Discord Community](https://discord.gg/2QAwJn7Egx) - **加入我们的英文 Discord 社区**
+- [💬 微信 (中文群)](./resources/wechat_group_2.jpg) - **点击查看二维码**
 
 ### 🤝 贡献代码
 
