@@ -22,6 +22,9 @@ export interface FirstMessageConfig {
  * 构建系统指令内容（完整 skills 内容注入 - 用于 Gemini）
  * Build system instructions content (full skills content injection - for Gemini)
  *
+ * 自动发现并包含 _builtin/ 目录下的所有内置 skills，无需手动指定
+ * Auto-discovers and includes all builtin skills from _builtin/ directory
+ *
  * @param config - 首次消息配置 / First message configuration
  * @returns 系统指令字符串或 undefined / System instructions string or undefined
  */
@@ -33,9 +36,21 @@ export async function buildSystemInstructions(config: FirstMessageConfig): Promi
     instructions.push(config.presetContext);
   }
 
+  // 自动发现内置 skills 并合并可选 skills
+  // Auto-discover builtin skills and merge with optional skills
+  const skillManager = AcpSkillManager.getInstance(config.enabledSkills);
+  await skillManager.discoverBuiltinSkills();
+
+  // 获取内置 skill 名称列表 / Get builtin skill name list
+  const builtinSkillNames = skillManager.getBuiltinSkillsIndex().map((s) => s.name);
+
+  // 合并：内置 skills + 可选 skills（去重）
+  // Merge: builtin skills + optional skills (deduplicated)
+  const allSkills = [...new Set([...builtinSkillNames, ...(config.enabledSkills || [])])];
+
   // 加载并添加 skills 内容 / Load and add skills content
-  if (config.enabledSkills && config.enabledSkills.length > 0) {
-    const skillsContent = await loadSkillsContent(config.enabledSkills);
+  if (allSkills.length > 0) {
+    const skillsContent = await loadSkillsContent(allSkills);
     if (skillsContent) {
       instructions.push(skillsContent);
     }

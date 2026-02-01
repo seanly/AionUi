@@ -111,12 +111,11 @@ export class GeminiAgentManager extends BaseAgentManager<
 
         // Build system instructions using unified agentUtils
         // 使用统一的 agentUtils 构建系统指令
-        // Always include 'cron' as a built-in skill
-        // 始终将 'cron' 作为内置 skill 包含
-        const allEnabledSkills = ['cron', ...(this.enabledSkills || [])];
+        // Builtin skills (e.g., cron, moltbook) are auto-discovered from _builtin/ directory
+        // 内置 skills（如 cron、moltbook）会从 _builtin/ 目录自动发现
         const finalPresetRules = await buildSystemInstructions({
           presetContext: this.presetRules,
-          enabledSkills: allEnabledSkills,
+          enabledSkills: this.enabledSkills,
         });
 
         // Determine yoloMode: forceYoloMode (cron jobs) takes priority over config setting
