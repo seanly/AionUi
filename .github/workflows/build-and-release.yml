@@ -49,7 +49,9 @@ jobs:
         include:
           - platform: 'macos-arm64'
             os: 'macos-14'
+            # dev branch: only build zip (skip DMG to avoid dmgbuild download issues)
             command: 'node scripts/build-with-builder.js arm64 --mac --arm64'
+            dev_command: 'node scripts/build-with-builder.js arm64 --mac --arm64 -c.mac.target=zip'
             artifact-name: 'macos-build-arm64'
             arch: 'arm64'
             dev_enabled: true   # Build on dev branch
@@ -343,7 +345,7 @@ jobs:
           max_attempts: 2
           retry_wait_seconds: 300
           continue_on_error: ${{ startsWith(matrix.platform, 'macos') }}
-          command: ${{ matrix.command }}
+          command: ${{ github.ref == 'refs/heads/dev' && matrix.dev_command || matrix.command }}
           on_retry_command: |
             echo "⚠️ 构建超时或失败，5 分钟后进行第 2 次尝试..."
             echo "这可能是临时网络问题或 Apple 公证服务延迟"
