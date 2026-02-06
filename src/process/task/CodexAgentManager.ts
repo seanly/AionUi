@@ -448,9 +448,9 @@ class CodexAgentManager extends BaseAgentManager<CodexAgentManagerData> implemen
     if (persist) {
       const tMessage = transformMessage(message);
       if (tMessage) {
-        // These message types need to go through composeMessage logic for merging:
-        // - agent_status: same msg_id should update existing status
-        // - codex_tool_call: same toolCallId should update existing tool call
+        // These message types go through composeMessage/addOrUpdateMessage for merging:
+        // - agent_status: uses fixed globalStatusMessageId (from CodexSessionManager) to merge with last status
+        // - codex_tool_call: has dedicated merge logic that searches by toolCallId
         if (tMessage.type === 'agent_status' || tMessage.type === 'codex_tool_call') {
           addOrUpdateMessage(this.conversation_id, tMessage);
         } else {
