@@ -51,7 +51,7 @@ export type AcpBackendAll =
   | 'opencode' // OpenCode CLI
   | 'copilot' // GitHub Copilot CLI
   | 'qoder' // Qoder CLI
-  | 'openclaw' // OpenClaw ACP
+  | 'openclaw-gateway' // OpenClaw Gateway WebSocket
   | 'custom'; // User-configured custom ACP agent
 
 /**
@@ -387,14 +387,14 @@ export const ACP_BACKENDS_ALL: Record<AcpBackendAll, AcpBackendConfig> = {
     supportsStreaming: false,
     acpArgs: ['--acp'], // qoder 使用 --acp flag
   },
-  openclaw: {
-    id: 'openclaw',
+  'openclaw-gateway': {
+    id: 'openclaw-gateway',
     name: 'OpenClaw',
     cliCommand: 'openclaw',
     authRequired: false,
-    enabled: true, // ✅ OpenClaw CLI，使用 `openclaw acp` 启动
+    enabled: true, // ✅ OpenClaw Gateway WebSocket mode
     supportsStreaming: true,
-    acpArgs: ['acp'], // openclaw 使用子命令而非 flag
+    acpArgs: ['gateway'], // openclaw gateway command (for detection)
   },
   custom: {
     id: 'custom',

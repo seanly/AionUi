@@ -8,7 +8,7 @@ import type { IConfirmation } from '@/common/chatLib';
 import { bridge } from '@office-ai/platform';
 import type { OpenDialogOptions } from 'electron';
 import type { McpSource } from '../process/services/mcpServices/McpProtocol';
-import type { AcpBackend, PresetAgentType } from '../types/acpTypes';
+import type { AcpBackend, AcpBackendAll, PresetAgentType } from '../types/acpTypes';
 import type { IMcpServer, IProvider, TChatConversation, TProviderWithModel } from './storage';
 import type { PreviewHistoryTarget, PreviewSnapshotInfo } from './types/preview';
 import type { UpdateCheckRequest, UpdateCheckResult, UpdateDownloadProgressEvent, UpdateDownloadRequest, UpdateDownloadResult } from './updateTypes';
@@ -180,6 +180,7 @@ export const acpConversation = {
   >('acp.get-available-agents'),
   checkEnv: bridge.buildProvider<{ env: Record<string, string> }, void>('acp.check.env'),
   refreshCustomAgents: bridge.buildProvider<IBridgeResponse, void>('acp.refresh-custom-agents'),
+  checkAgentHealth: bridge.buildProvider<IBridgeResponse<{ available: boolean; latency?: number; error?: string }>, { backend: AcpBackend }>('acp.check-agent-health'),
   // clearAllCache: bridge.buildProvider<IBridgeResponse<{ details?: any }>, void>('acp.clear.all.cache'),
 };
 
@@ -200,6 +201,12 @@ export const mcpService = {
 export const codexConversation = {
   sendMessage: conversation.sendMessage,
   responseStream: conversation.responseStream,
+};
+
+// OpenClaw 对话相关接口 - 复用统一的conversation接口
+export const openclawConversation = {
+  sendMessage: conversation.sendMessage,
+  responseStream: bridge.buildEmitter<IResponseMessage>('openclaw.response.stream'),
 };
 
 // Database operations
@@ -294,8 +301,6 @@ export const cron = {
 // Cron job types for IPC
 export type ICronSchedule = { kind: 'at'; atMs: number; description: string } | { kind: 'every'; everyMs: number; description: string } | { kind: 'cron'; expr: string; tz?: string; description: string };
 
-export type ICronAgentType = 'gemini' | 'claude' | 'codex' | 'opencode' | 'qwen' | 'goose' | 'custom';
-
 export interface ICronJob {
   id: string;
   name: string;
@@ -305,7 +310,7 @@ export interface ICronJob {
   metadata: {
     conversationId: string;
     conversationTitle?: string;
-    agentType: ICronAgentType;
+    agentType: AcpBackendAll;
     createdBy: 'user' | 'agent';
     createdAt: number;
     updatedAt: number;
@@ -327,7 +332,7 @@ export interface ICreateCronJobParams {
   message: string;
   conversationId: string;
   conversationTitle?: string;
-  agentType: ICronAgentType;
+  agentType: AcpBackendAll;
   createdBy: 'user' | 'agent';
 }
 
@@ -348,7 +353,7 @@ export interface IConfirmMessageParams {
 }
 
 export interface ICreateConversationParams {
-  type: 'gemini' | 'acp' | 'codex';
+  type: 'gemini' | 'acp' | 'codex' | 'openclaw-gateway';
   id?: string;
   name?: string;
   model: TProviderWithModel;

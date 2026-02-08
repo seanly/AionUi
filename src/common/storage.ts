@@ -171,6 +171,31 @@ export type TChatConversation =
         }
       >,
       'model'
+    >
+  | Omit<
+      IChatConversation<
+        'openclaw-gateway',
+        {
+          workspace?: string;
+          customWorkspace?: boolean;
+          /** Gateway configuration */
+          gateway?: {
+            host?: string;
+            port?: number;
+            token?: string;
+            password?: string;
+            useExternalGateway?: boolean;
+            cliPath?: string;
+          };
+          /** Session key for resume */
+          sessionKey?: string;
+          /** 启用的 skills 列表 / Enabled skills list */
+          enabledSkills?: string[];
+          /** 预设助手 ID / Preset assistant ID */
+          presetAssistantId?: string;
+        }
+      >,
+      'model'
     >;
 
 export type IChatConversationRefer = {
@@ -211,6 +236,14 @@ export interface IProvider {
    * 上下文token限制，可选字段，只在明确知道时填写
    */
   contextLimit?: number;
+  /**
+   * 每个模型的协议覆盖配置。映射模型名称到协议字符串。
+   * 仅在 platform 为 'new-api' 时使用。
+   * Per-model protocol overrides. Maps model name to protocol string.
+   * Only used when platform is 'new-api'.
+   * e.g. { "gemini-2.5-pro": "gemini", "claude-sonnet-4": "anthropic", "gpt-4o": "openai" }
+   */
+  modelProtocols?: Record<string, string>;
 }
 
 export type TProviderWithModel = Omit<IProvider, 'model'> & { useModel: string };

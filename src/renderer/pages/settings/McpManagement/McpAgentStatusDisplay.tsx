@@ -32,6 +32,7 @@ const AGENT_LOGO_MAP: Record<string, string> = {
   opencode: OpenCodeLogo,
   copilot: GitHubLogo,
   openclaw: OpenClawLogo,
+  'openclaw-gateway': OpenClawLogo,
 };
 
 const getAgentLogo = (agent: string): string | null => {
