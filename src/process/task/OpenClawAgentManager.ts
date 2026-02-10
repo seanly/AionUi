@@ -106,6 +106,8 @@ class OpenClawAgentManager extends BaseAgentManager<OpenClawAgentManagerData> {
 
     // Emit to frontend
     ipcBridge.openclawConversation.responseStream.emit(msg);
+    // Also emit to the unified conversation stream so the generic chat UI can render OpenClaw replies.
+    ipcBridge.conversation.responseStream.emit(msg);
 
     // Emit to Channel global event bus (Telegram/Lark streaming)
     channelEventBus.emitAgentMessage(this.conversation_id, msg);
@@ -145,6 +147,7 @@ class OpenClawAgentManager extends BaseAgentManager<OpenClawAgentManagerData> {
 
     // Emit signal events to frontend
     ipcBridge.openclawConversation.responseStream.emit(msg);
+    ipcBridge.conversation.responseStream.emit(msg);
 
     // Forward signals to Channel global event bus
     channelEventBus.emitAgentMessage(this.conversation_id, msg);
@@ -220,6 +223,7 @@ class OpenClawAgentManager extends BaseAgentManager<OpenClawAgentManagerData> {
     }
 
     ipcBridge.openclawConversation.responseStream.emit(message);
+    ipcBridge.conversation.responseStream.emit(message);
   }
 
   stop() {
