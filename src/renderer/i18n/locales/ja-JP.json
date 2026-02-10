@@ -452,6 +452,10 @@
   },
   "settings": {
     "about": "情報",
+    "assistant": {
+      "agentDescTelegram": "Telegram の会話に使用",
+      "nonGeminiHint": "Gemini 以外のモデルは選択した Agent 設定に従います"
+    },
     "assistants": "アシスタント",
     "assistantsList": "利用可能なアシスタント一覧",
     "assistantsEmpty": "利用可能なアシスタントがありません。",
@@ -811,7 +815,13 @@
     "multiKeyTestResult": "マルチキーテスト：{{valid}}/{{total}} 個有効",
     "multiKeyAllValid": "すべての {{total}} 個のキーが有効です",
     "multiKeyPartialValid": "{{valid}} 個有効、{{invalid}} 個無効",
-    "multiKeyAllInvalid": "すべての {{total}} 個のキーが無効です"
+    "multiKeyAllInvalid": "すべての {{total}} 個のキーが無効です",
+    "lark": {
+      "agent": "エージェント",
+      "agentDesc": "Lark の会話に使用",
+      "defaultModelDesc": "Lark の会話に使用するモデル",
+      "nonGeminiHint": "Gemini 以外のモデルは選択した Agent 設定に従います"
+    }
   },
   "messages": {
     "fileChanges": "ファイル変更",

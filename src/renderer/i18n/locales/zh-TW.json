@@ -423,6 +423,10 @@
   },
   "settings": {
     "about": "關於",
+    "assistant": {
+      "agentDescTelegram": "用於 Telegram 對話",
+      "nonGeminiHint": "非 Gemini 模型跟隨對應 Agent 設定"
+    },
     "assistants": "助理",
     "assistantsList": "可用助理清單",
     "assistantsEmpty": "目前沒有可用的助理。",

@@ -75,10 +75,22 @@ export interface IConfigStorageRefer {
     id: string;
     useModel: string;
   };
+  // Telegram assistant agent selection / Telegram 助手所使用的 Agent
+  'assistant.telegram.agent'?: {
+    backend: AcpBackend;
+    customAgentId?: string;
+    name?: string;
+  };
   // Lark assistant default model / Lark 助手默认模型
   'assistant.lark.defaultModel'?: {
     id: string;
     useModel: string;
+  };
+  // Lark assistant agent selection / Lark 助手所使用的 Agent
+  'assistant.lark.agent'?: {
+    backend: AcpBackend;
+    customAgentId?: string;
+    name?: string;
   };
 }
 

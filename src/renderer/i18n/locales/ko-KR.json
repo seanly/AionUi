@@ -349,6 +349,10 @@
   },
   "settings": {
     "title": "설정",
+    "assistant": {
+      "agentDescTelegram": "Telegram 대화에 사용",
+      "nonGeminiHint": "Gemini가 아닌 모델은 선택한 Agent 설정을 따릅니다"
+    },
     "authMethod": "인증",
     "geminiApiKey": "Gemini API 키",
     "vertexApiKey": "Vertex AI",

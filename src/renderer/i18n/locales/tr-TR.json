@@ -352,6 +352,10 @@
   },
   "settings": {
     "title": "Ayarlar",
+    "assistant": {
+      "agentDescTelegram": "Telegram sohbetleri icin kullanilir",
+      "nonGeminiHint": "Gemini olmayan modeller secilen Agent ayarlarini izler"
+    },
     "authMethod": "Kimlik Doğrulama",
     "geminiApiKey": "Gemini API Anahtarı",
     "vertexApiKey": "Vertex AI",
@@ -796,7 +800,13 @@
     "allSkillsExist": "Bulunan tüm yetenekler zaten mevcut",
     "noSkillsFound": "Seçilen yolda geçerli yetenek bulunamadı",
     "skillScanFailed": "Yetenekler taranamadı",
-    "quickScan": "Ortak Yolları Hızlı Tara"
+    "quickScan": "Ortak Yolları Hızlı Tara",
+    "lark": {
+      "agent": "Ajan",
+      "agentDesc": "Lark sohbetleri icin kullanilir",
+      "defaultModelDesc": "Lark sohbetleri icin kullanilan model",
+      "nonGeminiHint": "Gemini olmayan modeller secilen Agent ayarlarini izler"
+    }
   },
 
   "messages": {

@@ -847,7 +847,9 @@
       "revokeAccess": "撤销访问权限",
       "userRevoked": "已撤销用户访问权限",
       "revokeFailed": "撤销失败",
-      "copyCode": "复制配对码"
+      "copyCode": "复制配对码",
+      "agentDescTelegram": "用于 Telegram 对话",
+      "nonGeminiHint": "非 Gemini 模型跟随对应 Agent 设置"
     },
     "lark": {
       "appId": "App ID",
@@ -879,7 +881,10 @@
       "step4": "授权成功后，你可以通过飞书与 AI 助手聊天！",
       "waitingConnection": "WebSocket 连接正在建立，请稍候...",
       "showOptionalFields": "显示可选配置",
-      "hideOptionalFields": "隐藏可选配置"
+      "hideOptionalFields": "隐藏可选配置",
+      "agent": "Agent",
+      "agentDesc": "用于 Lark 对话",
+      "nonGeminiHint": "非 Gemini 模型跟随对应 Agent 设置"
     }
   },
   "messages": {

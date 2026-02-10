@@ -5,10 +5,11 @@
  */
 
 import type { IChannelPairingRequest, IChannelPluginStatus, IChannelUser } from '@/channels/types';
-import { channel } from '@/common/ipcBridge';
+import { acpConversation, channel } from '@/common/ipcBridge';
 import type { IProvider, TProviderWithModel } from '@/common/storage';
 import { ConfigStorage } from '@/common/storage';
 import { hasSpecificModelCapability } from '@/renderer/utils/modelCapabilities';
+import type { AcpBackend } from '@/types/acpTypes';
 import { Button, Dropdown, Empty, Input, Menu, Message, Spin, Tooltip } from '@arco-design/web-react';
 import { CheckOne, CloseOne, Copy, Delete, Down, Refresh } from '@icon-park/react';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -100,6 +101,10 @@ const TelegramConfigForm: React.FC<TelegramConfigFormProps> = ({ pluginStatus, m
   const [pendingPairings, setPendingPairings] = useState<IChannelPairingRequest[]>([]);
   const [authorizedUsers, setAuthorizedUsers] = useState<IChannelUser[]>([]);
 
+  // Agent selection (used for Telegram conversations)
+  const [availableAgents, setAvailableAgents] = useState<Array<{ backend: AcpBackend; name: string; customAgentId?: string }>>([]);
+  const [selectedAgent, setSelectedAgent] = useState<{ backend: AcpBackend; name?: string; customAgentId?: string }>({ backend: 'gemini' });
+
   // Load pending pairings
   const loadPendingPairings = useCallback(async () => {
     setPairingLoading(true);
@@ -135,6 +140,43 @@ const TelegramConfigForm: React.FC<TelegramConfigFormProps> = ({ pluginStatus, m
     void loadPendingPairings();
     void loadAuthorizedUsers();
   }, [loadPendingPairings, loadAuthorizedUsers]);
+
+  // Load available agents + saved selection
+  useEffect(() => {
+    const loadAgentsAndSelection = async () => {
+      try {
+        const [agentsResp, saved] = await Promise.all([acpConversation.getAvailableAgents.invoke(), ConfigStorage.get('assistant.telegram.agent')]);
+
+        if (agentsResp.success && agentsResp.data) {
+          const list = agentsResp.data.map((a) => ({ backend: a.backend, name: a.name, customAgentId: a.customAgentId }));
+          setAvailableAgents(list);
+        }
+
+        if (saved && typeof saved === 'object' && 'backend' in saved && typeof (saved as any).backend === 'string') {
+          setSelectedAgent({
+            backend: (saved as any).backend as AcpBackend,
+            customAgentId: (saved as any).customAgentId,
+            name: (saved as any).name,
+          });
+        } else if (typeof saved === 'string') {
+          setSelectedAgent({ backend: saved as AcpBackend });
+        }
+      } catch (error) {
+        console.error('[TelegramConfig] Failed to load agents:', error);
+      }
+    };
+
+    void loadAgentsAndSelection();
+  }, []);
+
+  const persistSelectedAgent = async (agent: { backend: AcpBackend; customAgentId?: string; name?: string }) => {
+    try {
+      await ConfigStorage.set('assistant.telegram.agent', agent);
+    } catch (error) {
+      console.error('[TelegramConfig] Failed to save agent:', error);
+      Message.error(t('common.saveFailed', 'Failed to save'));
+    }
+  };
 
   // Listen for pairing requests
   useEffect(() => {
@@ -303,6 +345,8 @@ const TelegramConfigForm: React.FC<TelegramConfigFormProps> = ({ pluginStatus, m
     return `${remaining} min`;
   };
 
+  const isGeminiAgent = selectedAgent.backend === 'gemini';
+
   return (
     <div className='flex flex-col gap-24px'>
       <PreferenceRow label={t('settings.assistant.botToken', 'Bot Token')} description={t('settings.assistant.botTokenDesc', 'Open Telegram, find @BotFather and send /newbot to get your Bot Token.')}>
@@ -314,48 +358,86 @@ const TelegramConfigForm: React.FC<TelegramConfigFormProps> = ({ pluginStatus, m
         </div>
       </PreferenceRow>
 
-      <PreferenceRow label={t('settings.assistant.defaultModel', 'Default Model')} description={t('settings.assistant.defaultModelDesc', 'Model used for Telegram conversations')}>
-        <Dropdown
-          trigger='click'
-          position='br'
-          droplist={
-            <Menu selectedKeys={selectedModel ? [selectedModel.id + selectedModel.useModel] : []}>
-              {!modelList || modelList.length === 0 ? (
-                <Menu.Item key='no-models' className='px-12px py-12px text-t-secondary text-14px text-center' disabled>
-                  {t('settings.assistant.noAvailableModels', 'No Gemini models configured')}
-                </Menu.Item>
-              ) : (
-                modelList.map((provider) => {
-                  const availableModels = getAvailableModels(provider);
-                  if (availableModels.length === 0) return null;
+      {/* Agent Selection */}
+      <div className='flex flex-col gap-8px'>
+        <PreferenceRow label={t('settings.agent', 'Agent')} description={t('settings.assistant.agentDescTelegram', 'Used for Telegram conversations')}>
+          <Dropdown
+            trigger='click'
+            position='br'
+            droplist={
+              <Menu selectedKeys={[selectedAgent.customAgentId ? `${selectedAgent.backend}|${selectedAgent.customAgentId}` : selectedAgent.backend]}>
+                {(availableAgents.length > 0 ? availableAgents : [{ backend: 'gemini' as AcpBackend, name: 'Gemini CLI' }]).map((a) => {
+                  const key = a.customAgentId ? `${a.backend}|${a.customAgentId}` : a.backend;
                   return (
-                    <Menu.ItemGroup title={provider.name} key={provider.id}>
-                      {availableModels.map((modelName) => (
-                        <Menu.Item
-                          key={provider.id + modelName}
-                          className={selectedModel?.id + selectedModel?.useModel === provider.id + modelName ? '!bg-fill-2' : ''}
-                          onClick={() => {
-                            handleModelSelect(provider, modelName).catch((error) => {
-                              console.error('Failed to select model:', error);
-                            });
-                          }}
-                        >
-                          {modelName}
-                        </Menu.Item>
-                      ))}
-                    </Menu.ItemGroup>
+                    <Menu.Item
+                      key={key}
+                      onClick={() => {
+                        const next = { backend: a.backend, customAgentId: a.customAgentId, name: a.name };
+                        setSelectedAgent(next);
+                        void persistSelectedAgent(next);
+                      }}
+                    >
+                      {a.name}
+                    </Menu.Item>
                   );
-                })
-              )}
-            </Menu>
-          }
-        >
-          <Button type='secondary' className='min-w-160px flex items-center justify-between gap-8px'>
-            <span className='truncate'>{selectedModel?.useModel || t('settings.assistant.selectModel', 'Select Model')}</span>
-            <Down theme='outline' size={14} />
-          </Button>
-        </Dropdown>
-      </PreferenceRow>
+                })}
+              </Menu>
+            }
+          >
+            <Button type='secondary' className='min-w-160px flex items-center justify-between gap-8px'>
+              <span className='truncate'>{selectedAgent.name || availableAgents.find((a) => (a.customAgentId ? `${a.backend}|${a.customAgentId}` : a.backend) === (selectedAgent.customAgentId ? `${selectedAgent.backend}|${selectedAgent.customAgentId}` : selectedAgent.backend))?.name || selectedAgent.backend}</span>
+              <Down theme='outline' size={14} />
+            </Button>
+          </Dropdown>
+        </PreferenceRow>
+        {!isGeminiAgent && <div className='text-12px text-t-tertiary'>{t('settings.assistant.nonGeminiHint', 'Non Gemini models follow corresponding Agent settings')}</div>}
+      </div>
+
+      {/* Default Model Selection (Gemini only) */}
+      {isGeminiAgent && (
+        <PreferenceRow label={t('settings.assistant.defaultModel', 'Default Model')} description={t('settings.assistant.defaultModelDesc', 'Model used for Telegram conversations')}>
+          <Dropdown
+            trigger='click'
+            position='br'
+            droplist={
+              <Menu selectedKeys={selectedModel ? [selectedModel.id + selectedModel.useModel] : []}>
+                {!modelList || modelList.length === 0 ? (
+                  <Menu.Item key='no-models' className='px-12px py-12px text-t-secondary text-14px text-center' disabled>
+                    {t('settings.assistant.noAvailableModels', 'No Gemini models configured')}
+                  </Menu.Item>
+                ) : (
+                  modelList.map((provider) => {
+                    const availableModels = getAvailableModels(provider);
+                    if (availableModels.length === 0) return null;
+                    return (
+                      <Menu.ItemGroup title={provider.name} key={provider.id}>
+                        {availableModels.map((modelName) => (
+                          <Menu.Item
+                            key={provider.id + modelName}
+                            className={selectedModel?.id + selectedModel?.useModel === provider.id + modelName ? '!bg-fill-2' : ''}
+                            onClick={() => {
+                              handleModelSelect(provider, modelName).catch((error) => {
+                                console.error('Failed to select model:', error);
+                              });
+                            }}
+                          >
+                            {modelName}
+                          </Menu.Item>
+                        ))}
+                      </Menu.ItemGroup>
+                    );
+                  })
+                )}
+              </Menu>
+            }
+          >
+            <Button type='secondary' className='min-w-160px flex items-center justify-between gap-8px'>
+              <span className='truncate'>{selectedModel?.useModel || t('settings.assistant.selectModel', 'Select Model')}</span>
+              <Down theme='outline' size={14} />
+            </Button>
+          </Dropdown>
+        </PreferenceRow>
+      )}
 
       {/* Next Steps Guide - show when bot is enabled and no authorized users yet */}
       {pluginStatus?.enabled && pluginStatus?.connected && authorizedUsers.length === 0 && (
