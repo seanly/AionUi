@@ -284,6 +284,15 @@ const Guid: React.FC = () => {
     }>
   >();
   const [customAgents, setCustomAgents] = useState<AcpBackendConfig[]>([]);
+  const availableCustomAgentIds = useMemo(() => {
+    const ids = new Set<string>();
+    (availableAgents || []).forEach((agent) => {
+      if (agent.backend === 'custom' && agent.customAgentId) {
+        ids.add(agent.customAgentId);
+      }
+    });
+    return ids;
+  }, [availableAgents]);
 
   /**
    * 获取代理的唯一选择键
@@ -553,17 +562,6 @@ const Guid: React.FC = () => {
           _setSelectedAgentKey(savedAgentKey);
           return;
         }
-
-        // 2. For custom agents, check storage
-        if (savedAgentKey.startsWith('custom:')) {
-          const customId = savedAgentKey.slice(7);
-          const agents = await ConfigStorage.get('acp.customAgents');
-          if (cancelled) return;
-
-          if (agents?.some((a: AcpBackendConfig) => a.id === customId)) {
-            _setSelectedAgentKey(savedAgentKey);
-          }
-        }
       } catch (error) {
         console.error('Failed to load last selected agent:', error);
       }
@@ -581,7 +579,8 @@ const Guid: React.FC = () => {
     ConfigStorage.get('acp.customAgents')
       .then((agents) => {
         if (!isActive) return;
-        setCustomAgents(agents || []);
+        const list = (agents || []).filter((agent: AcpBackendConfig) => availableCustomAgentIds.has(agent.id));
+        setCustomAgents(list);
       })
       .catch((error) => {
         console.error('Failed to load custom agents:', error);
@@ -589,7 +588,7 @@ const Guid: React.FC = () => {
     return () => {
       isActive = false;
     };
-  }, [availableAgentsData]);
+  }, [availableCustomAgentIds]);
 
   useEffect(() => {
     if (mentionOpen) {
