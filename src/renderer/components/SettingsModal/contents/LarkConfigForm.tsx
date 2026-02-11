@@ -167,6 +167,7 @@ const LarkConfigForm: React.FC<LarkConfigFormProps> = ({ pluginStatus, modelList
   const persistSelectedAgent = async (agent: { backend: AcpBackendAll; customAgentId?: string; name?: string }) => {
     try {
       await ConfigStorage.set('assistant.lark.agent', agent);
+      Message.success(t('common.saveSuccess', 'Saved successfully'));
     } catch (error) {
       console.error('[LarkConfig] Failed to save agent:', error);
       Message.error(t('common.saveFailed', 'Failed to save'));
@@ -502,6 +503,10 @@ const LarkConfigForm: React.FC<LarkConfigFormProps> = ({ pluginStatus, modelList
                     <Menu.Item
                       key={key}
                       onClick={() => {
+                        const currentKey = selectedAgent.customAgentId ? `${selectedAgent.backend}|${selectedAgent.customAgentId}` : selectedAgent.backend;
+                        if (key === currentKey) {
+                          return;
+                        }
                         const next = { backend: a.backend, customAgentId: a.customAgentId, name: a.name };
                         setSelectedAgent(next);
                         void persistSelectedAgent(next);
