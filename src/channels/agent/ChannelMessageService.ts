@@ -75,7 +75,6 @@ export class ChannelMessageService {
     });
 
     this.initialized = true;
-    console.log('[ChannelMessageService] Initialized with global event listener');
   }
 
   /**
@@ -100,14 +99,9 @@ export class ChannelMessageService {
       return;
     }
 
-    console.log('[ChannelMessageService] Incoming message:', message.msg_id, message.type, 'content preview:', message.type === 'text' ? message.content.content?.slice(0, 30) : 'non-text');
-
     let messageList = this.messageListMap.get(conversationId);
     if (!messageList) {
       messageList = [];
-      console.log('[ChannelMessageService] New conversation, empty messageList');
-    } else {
-      console.log('[ChannelMessageService] Existing conversation, messageList has', messageList.length, 'messages, last msg_id:', messageList[messageList.length - 1]?.msg_id);
     }
 
     messageList = composeMessage(message, messageList, (type, msg: TMessage) => {
@@ -180,18 +174,9 @@ export class ChannelMessageService {
         reject,
       });
 
-      // 发送消息
-      // Send message
-      const payload =
-        task.type === 'gemini'
-          ? {
-              input: message,
-              msg_id: msgId,
-            }
-          : {
-              content: message,
-              msg_id: msgId,
-            };
+      // Build payload based on agent type.
+      // Gemini expects { input }, ACP/Codex expect { content }.
+      const payload: { input?: string; content?: string; msg_id: string } = task.type === 'gemini' ? { input: message, msg_id: msgId } : task.type === 'acp' || task.type === 'codex' ? { content: message, msg_id: msgId } : { content: message, msg_id: msgId };
 
       task.sendMessage(payload).catch((error: Error) => {
         const errorMessage = `Error: ${error.message || 'Failed to send message'}`;
@@ -209,8 +194,8 @@ export class ChannelMessageService {
    *
    * 清理会话上下文。Agent 的清理由 WorkerManage 处理。
    */
-  async clearContext(sessionId: string): Promise<void> {
-    console.log(`[ChannelMessageService] clearContext called for session ${sessionId}`);
+  async clearContext(_sessionId: string): Promise<void> {
+    // Agent cleanup is handled by WorkerManage
   }
 
   /**
@@ -221,7 +206,6 @@ export class ChannelMessageService {
     const stream = this.activeStreams.get(conversationId);
     if (stream) {
       this.activeStreams.delete(conversationId);
-      console.log(`[ChannelMessageService] Cleared stream for conversation ${conversationId}`);
     }
   }
 
@@ -258,7 +242,6 @@ export class ChannelMessageService {
       // 调用 agent 的 confirm 方法
       // Call agent's confirm method
       task.confirm(conversationId, callId, value);
-      console.log(`[ChannelMessageService] Confirmed tool call ${callId} with value ${value}`);
     } catch (error) {
       console.error(`[ChannelMessageService] Failed to confirm tool call:`, error);
       throw error;
@@ -285,7 +268,6 @@ export class ChannelMessageService {
     }
 
     this.initialized = false;
-    console.log('[ChannelMessageService] Shutdown complete');
   }
 }
 

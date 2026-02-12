@@ -7,10 +7,10 @@
 import type { ICreateConversationParams } from '@/common/ipcBridge';
 import type { TChatConversation, TProviderWithModel } from '@/common/storage';
 import { uuid } from '@/common/utils';
-import crypto from 'crypto';
 import fs from 'fs/promises';
 import path from 'path';
 import { getSystemDir } from './initStorage';
+import { computeOpenClawIdentityHash } from './utils/openclawUtils';
 
 /**
  * 创建工作空间目录（不复制文件）
@@ -35,23 +35,6 @@ const buildWorkspaceWidthFiles = async (defaultWorkspaceName: string, workspace?
   }
 
   return { workspace, customWorkspace };
-};
-
-const computeOpenClawIdentityHash = async (workspace?: string): Promise<string | null> => {
-  if (!workspace) return null;
-  const files = ['IDENTITY.md', 'SOUL.md'];
-  const chunks: string[] = [];
-  for (const name of files) {
-    const filePath = path.join(workspace, name);
-    try {
-      const content = await fs.readFile(filePath, 'utf-8');
-      chunks.push(`${name}\n${content}`);
-    } catch {
-      // missing file is acceptable
-    }
-  }
-  if (chunks.length === 0) return null;
-  return crypto.createHash('sha1').update(chunks.join('\n---\n')).digest('hex');
 };
 
 export const createGeminiAgent = async (model: TProviderWithModel, workspace?: string, defaultFiles?: string[], webSearchEngine?: 'google' | 'default', customWorkspace?: boolean, contextFileName?: string, presetRules?: string, enabledSkills?: string[], presetAssistantId?: string): Promise<TChatConversation> => {

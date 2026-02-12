@@ -264,8 +264,6 @@ export class ActionExecutor {
   private async handleIncomingMessage(message: IUnifiedIncomingMessage): Promise<void> {
     const { platform, chatId, user, content, action } = message;
 
-    console.log(`[ActionExecutor] Processing message from ${platform}:${user.id}`);
-
     // Get plugin for sending responses
     const plugin = this.getPluginForMessage(message);
     if (!plugin) {
@@ -289,7 +287,6 @@ export class ActionExecutor {
     try {
       // Check if user is authorized
       const isAuthorized = this.pairingService.isUserAuthorized(user.id, platform);
-      console.log(`[ActionExecutor] User ${user.id} authorized: ${isAuthorized}`);
 
       // Handle /start command - always show pairing
       if (content.type === 'command' && content.text === '/start') {
@@ -393,7 +390,6 @@ export class ActionExecutor {
         if (result.success && result.conversation) {
           const agentType = backend === 'codex' ? 'codex' : backend === 'gemini' ? 'gemini' : 'acp';
           session = this.sessionManager.createSessionWithConversation(channelUser, result.conversation.id, agentType);
-          console.log(`[ActionExecutor] Using conversation: ${result.conversation.id} (platform=${platform}, backend=${backend})`);
         } else {
           console.error(`[ActionExecutor] Failed to create conversation: ${result.error}`);
           await context.sendMessage({
@@ -408,10 +404,8 @@ export class ActionExecutor {
       context.conversationId = session.conversationId;
 
       // Route based on action or content
-      console.log(`[ActionExecutor] Routing - action:`, action, `content.type:`, content.type);
       if (action) {
         // Explicit action from button press
-        console.log(`[ActionExecutor] Executing action: ${action.name} with params:`, action.params);
         await this.executeAction(context, action.name, action.params);
       } else if (content.type === 'action') {
         // Action encoded in content
@@ -454,8 +448,6 @@ export class ActionExecutor {
       });
       return;
     }
-
-    console.log(`[ActionExecutor] Executing action: ${actionName}`);
 
     try {
       const result = await action.handler(context, params);
@@ -521,10 +513,8 @@ export class ActionExecutor {
         const targetMsgId = sentMessageIds[sentMessageIds.length - 1] || thinkingMsgId;
         try {
           await context.editMessage(targetMsgId, msg);
-        } catch (editError) {
-          // 忽略编辑错误（消息未修改等）
+        } catch {
           // Ignore edit errors (message not modified, etc.)
-          console.debug('[ActionExecutor] Edit error (ignored):', editError);
         }
       };
 
@@ -541,8 +531,6 @@ export class ActionExecutor {
         // Save last message content
         lastMessageContent = outgoingMessage;
 
-        console.log(`[ActionExecutor] Stream callback - isInsert: ${isInsert}, msg_id: ${message.msg_id}, type: ${message.type}, sentMessageIds count: ${sentMessageIds.length}`);
-
         // IMPORTANT: Always treat first streaming message as update to thinking message
         // This prevents async race condition where first insert's sendMessage takes time
         // while subsequent messages arrive and get processed as updates
@@ -551,9 +539,6 @@ export class ActionExecutor {
         if (isInsert && sentMessageIds.length === 1) {
           // First streaming message: update thinking message instead of inserting
           // 第一个流式消息：更新thinking消息而不是插入新消息
-          console.log(`[ActionExecutor] First streaming message, updating thinking message instead of inserting`);
-          const targetMsgId = sentMessageIds[0] || thinkingMsgId;
-          console.log(`[ActionExecutor] Updating message, targetMsgId: ${targetMsgId}, content preview: ${outgoingMessage.text?.slice(0, 50)}`);
           pendingMessage = outgoingMessage;
 
           if (now - lastUpdateTime >= UPDATE_THROTTLE_MS) {
@@ -581,15 +566,12 @@ export class ActionExecutor {
           try {
             const newMsgId = await context.sendMessage(outgoingMessage);
             sentMessageIds.push(newMsgId);
-            console.log(`[ActionExecutor] Inserted new message, newMsgId: ${newMsgId}, total messages: ${sentMessageIds.length}`);
-          } catch (sendError) {
-            console.debug('[ActionExecutor] Send error (ignored):', sendError);
+          } catch {
+            // Ignore send errors
           }
         } else {
           // 更新消息：使用定时器节流，确保最后一条消息能被发送
           // Update message: throttle with timer to ensure last message is sent
-          const targetMsgId = sentMessageIds[sentMessageIds.length - 1] || thinkingMsgId;
-          console.log(`[ActionExecutor] Updating message, targetMsgId: ${targetMsgId}, content preview: ${outgoingMessage.text?.slice(0, 50)}`);
           pendingMessage = outgoingMessage;
 
           if (now - lastUpdateTime >= UPDATE_THROTTLE_MS) {
@@ -629,8 +611,8 @@ export class ActionExecutor {
       if (pendingMessage) {
         try {
           await doEditMessage(pendingMessage);
-        } catch (error) {
-          console.debug('[ActionExecutor] Final pending message edit error (ignored):', error);
+        } catch {
+          // Ignore final edit error
         }
         pendingMessage = null;
       }
@@ -689,7 +671,5 @@ export class ActionExecutor {
     for (const action of platformActions) {
       this.actionRegistry.set(action.name, action);
     }
-
-    console.log(`[ActionExecutor] Registered ${this.actionRegistry.size} actions`);
   }
 }

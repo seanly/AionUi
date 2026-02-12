@@ -7,9 +7,6 @@
 import type { CodexAgentManager } from '@/agent/codex';
 import { GeminiAgent, GeminiApprovalStore } from '@/agent/gemini';
 import type { TChatConversation } from '@/common/storage';
-import crypto from 'crypto';
-import fs from 'fs/promises';
-import path from 'path';
 import { getDatabase } from '@process/database';
 import { cronService } from '@process/services/cron/CronService';
 import { ipcBridge } from '../../common';
@@ -21,27 +18,11 @@ import type { GeminiAgentManager } from '../task/GeminiAgentManager';
 import type NanoBotAgentManager from '../task/NanoBotAgentManager';
 import type OpenClawAgentManager from '../task/OpenClawAgentManager';
 import { copyFilesToDirectory, readDirectoryRecursive } from '../utils';
+import { computeOpenClawIdentityHash } from '../utils/openclawUtils';
 import WorkerManage from '../WorkerManage';
 import { migrateConversationToDatabase } from './migrationUtils';
 
 export function initConversationBridge(): void {
-  const computeOpenClawIdentityHash = async (workspace?: string): Promise<string | null> => {
-    if (!workspace) return null;
-    const files = ['IDENTITY.md', 'SOUL.md'];
-    const chunks: string[] = [];
-    for (const name of files) {
-      const filePath = path.join(workspace, name);
-      try {
-        const content = await fs.readFile(filePath, 'utf-8');
-        chunks.push(`${name}\n${content}`);
-      } catch {
-        // ignore missing file
-      }
-    }
-    if (chunks.length === 0) return null;
-    return crypto.createHash('sha1').update(chunks.join('\n---\n')).digest('hex');
-  };
-
   ipcBridge.openclawConversation.getRuntime.provider(async ({ conversation_id }) => {
     try {
       const db = getDatabase();

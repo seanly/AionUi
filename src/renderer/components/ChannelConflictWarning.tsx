@@ -82,9 +82,6 @@ export const ChannelConflictWarning: React.FC<ChannelConflictWarningProps> = ({ 
                 Help me disable OpenClaw {platformName}
               </Button>
             )}
-            <Link href='https://github.com/your-repo/docs/openclaw-conflict' target='_blank'>
-              Learn more
-            </Link>
             {onIgnore && (
               <Button type='text' onClick={onIgnore}>
                 Ignore (I know what I'm doing)

@@ -57,13 +57,13 @@ class BaseAgentManager<Data, ConfirmationOption extends any = any> extends ForkT
       return;
     }
 
-    const origin = this.confirmations.find((p) => p.id === data.id);
-    if (origin) {
-      Object.assign(origin, data);
+    const originIndex = this.confirmations.findIndex((p) => p.id === data.id);
+    if (originIndex !== -1) {
+      this.confirmations = this.confirmations.map((item, i) => (i === originIndex ? { ...item, ...data } : item));
       ipcBridge.conversation.confirmation.update.emit({ ...data, conversation_id: this.conversation_id });
       return;
     }
-    this.confirmations.push(data);
+    this.confirmations = [...this.confirmations, data];
     ipcBridge.conversation.confirmation.add.emit({ ...data, conversation_id: this.conversation_id });
   }
   confirm(_msg_id: string, callId: string, _data: ConfirmationOption) {
