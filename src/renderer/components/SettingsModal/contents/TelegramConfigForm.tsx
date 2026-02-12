@@ -172,7 +172,7 @@ const TelegramConfigForm: React.FC<TelegramConfigFormProps> = ({ pluginStatus, m
   const persistSelectedAgent = async (agent: { backend: AcpBackendAll; customAgentId?: string; name?: string }) => {
     try {
       await ConfigStorage.set('assistant.telegram.agent', agent);
-      Message.success(t('common.saveSuccess', 'Saved successfully'));
+      Message.success(t('settings.assistant.agentSwitched', "Agent switched. Please delete the Channel's historical conversations before continuing to use, new conversations will use the new configuration. (Next version will support automatic hot update)"));
     } catch (error) {
       console.error('[TelegramConfig] Failed to save agent:', error);
       Message.error(t('common.saveFailed', 'Failed to save'));
@@ -276,7 +276,7 @@ const TelegramConfigForm: React.FC<TelegramConfigFormProps> = ({ pluginStatus, m
         id: provider.id,
         useModel: modelName,
       });
-      Message.success(t('settings.assistant.modelSaved', 'Model saved'));
+      Message.success(t('settings.assistant.modelSwitched', "Model switched. Please delete the Channel's historical conversations before continuing to use, new conversations will use the new configuration. (Next version will support automatic hot update)"));
     } catch (error) {
       console.error('[ChannelSettings] Failed to save model:', error);
       Message.error(t('settings.assistant.modelSaveFailed', 'Failed to save model'));
@@ -396,12 +396,11 @@ const TelegramConfigForm: React.FC<TelegramConfigFormProps> = ({ pluginStatus, m
             </Button>
           </Dropdown>
         </PreferenceRow>
-        {!isGeminiAgent && <div className='text-12px text-t-tertiary'>{t('settings.assistant.nonGeminiHint', 'Non Gemini models follow corresponding Agent settings')}</div>}
       </div>
 
-      {/* Default Model Selection (Gemini only) */}
-      {isGeminiAgent && (
-        <PreferenceRow label={t('settings.assistant.defaultModel', 'Default Model')} description={t('settings.assistant.defaultModelDesc', 'Model used for Telegram conversations')}>
+      {/* Default Model Selection */}
+      <PreferenceRow label={t('settings.assistant.defaultModel', '对话模型')} description={t('settings.assistant.defaultModelDesc', '用于Agent对话时调用')}>
+        {isGeminiAgent ? (
           <Dropdown
             trigger='click'
             position='br'
@@ -442,8 +441,10 @@ const TelegramConfigForm: React.FC<TelegramConfigFormProps> = ({ pluginStatus, m
               <Down theme='outline' size={14} />
             </Button>
           </Dropdown>
-        </PreferenceRow>
-      )}
+        ) : (
+          <div className='text-14px text-t-secondary min-w-160px'>{t('settings.assistant.autoFollowCliModel', '自动跟随CLI运行时的模型')}</div>
+        )}
+      </PreferenceRow>
 
       {/* Next Steps Guide - show when bot is enabled and no authorized users yet */}
       {pluginStatus?.enabled && pluginStatus?.connected && authorizedUsers.length === 0 && (

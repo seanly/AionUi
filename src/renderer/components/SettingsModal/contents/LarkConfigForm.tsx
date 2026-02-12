@@ -167,7 +167,7 @@ const LarkConfigForm: React.FC<LarkConfigFormProps> = ({ pluginStatus, modelList
   const persistSelectedAgent = async (agent: { backend: AcpBackendAll; customAgentId?: string; name?: string }) => {
     try {
       await ConfigStorage.set('assistant.lark.agent', agent);
-      Message.success(t('common.saveSuccess', 'Saved successfully'));
+      Message.success(t('settings.assistant.agentSwitched', "Agent switched. Please delete the Channel's historical conversations before continuing to use, new conversations will use the new configuration. (Next version will support automatic hot update)"));
     } catch (error) {
       console.error('[LarkConfig] Failed to save agent:', error);
       Message.error(t('common.saveFailed', 'Failed to save'));
@@ -291,7 +291,7 @@ const LarkConfigForm: React.FC<LarkConfigFormProps> = ({ pluginStatus, modelList
         id: provider.id,
         useModel: modelName,
       });
-      Message.success(t('settings.assistant.modelSaved', 'Model saved'));
+      Message.success(t('settings.assistant.modelSwitched', "Model switched. Please delete the Channel's historical conversations before continuing to use, new conversations will use the new configuration. (Next version will support automatic hot update)"));
     } catch (error) {
       console.error('[LarkConfig] Failed to save model:', error);
       Message.error(t('settings.assistant.modelSaveFailed', 'Failed to save model'));
@@ -525,13 +525,11 @@ const LarkConfigForm: React.FC<LarkConfigFormProps> = ({ pluginStatus, modelList
             </Button>
           </Dropdown>
         </PreferenceRow>
-
-        {!isGeminiAgent && <div className='text-12px text-t-tertiary'>{t('settings.lark.nonGeminiHint', 'Non Gemini models follow corresponding Agent settings')}</div>}
       </div>
 
       {/* Default Model Selection */}
-      {isGeminiAgent && (
-        <PreferenceRow label={t('settings.assistant.defaultModel', 'Default Model')} description={t('settings.lark.defaultModelDesc', 'Model used for Lark conversations')}>
+      <PreferenceRow label={t('settings.assistant.defaultModel', '对话模型')} description={t('settings.lark.defaultModelDesc', '用于Agent对话时调用')}>
+        {isGeminiAgent ? (
           <Dropdown
             trigger='click'
             position='br'
@@ -572,8 +570,10 @@ const LarkConfigForm: React.FC<LarkConfigFormProps> = ({ pluginStatus, modelList
               <Down theme='outline' size={14} />
             </Button>
           </Dropdown>
-        </PreferenceRow>
-      )}
+        ) : (
+          <div className='text-14px text-t-secondary min-w-160px'>{t('settings.assistant.autoFollowCliModel', '自动跟随CLI运行时的模型')}</div>
+        )}
+      </PreferenceRow>
 
       {/* Connection Status - show when bot is enabled */}
       {pluginStatus?.enabled && authorizedUsers.length === 0 && (

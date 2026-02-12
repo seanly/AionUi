@@ -853,7 +853,9 @@
       "revokeFailed": "Failed to revoke user",
       "copyCode": "Copy pairing code",
       "agentDescTelegram": "Used for Telegram conversations",
-      "nonGeminiHint": "Non Gemini models follow corresponding Agent settings"
+      "autoFollowCliModel": "Automatically follow the model when CLI is running",
+      "agentSwitched": "Agent switched. Please delete the Channel's historical conversations before continuing to use, new conversations will use the new configuration. (Next version will support automatic hot update)",
+      "modelSwitched": "Model switched. Please delete the Channel's historical conversations before continuing to use, new conversations will use the new configuration. (Next version will support automatic hot update)"
     },
     "lark": {
       "appId": "App ID",
@@ -888,7 +890,7 @@
       "hideOptionalFields": "Hide optional settings",
       "agent": "Agent",
       "agentDesc": "Used for Lark conversations",
-      "nonGeminiHint": "Non Gemini models follow corresponding Agent settings"
+      "autoFollowCliModel": "Automatically follow the model when CLI is running"
     }
   },
   "messages": {
