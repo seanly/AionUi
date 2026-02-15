@@ -389,11 +389,9 @@ export class OpenClawAgent {
   }
 
   private handleChatEvent(event: ChatEvent): void {
-    // Skip delta processing when handleAgentEvent is already handling the assistant stream.
-    // During channel turns, currentStreamMsgId is preserved across handleEndTurn calls
-    // so late-arriving chat.event deltas are still blocked.
-    if (event.state === 'delta' && this.currentStreamMsgId) {
-      // Agent stream is active (or completed for channel turn), skip to avoid duplicate content
+    // Skip delta processing when agent.event is already handling the assistant stream,
+    // or during channel turns where late-arriving chat.event deltas must be blocked.
+    if (event.state === 'delta' && (this.currentStreamMsgId || this.channelTurnActive)) {
       return;
     }
 
@@ -593,12 +591,10 @@ export class OpenClawAgent {
   }
 
   private handleEndTurn(): void {
-    // During channel turns, keep currentStreamMsgId set so that late-arriving
-    // chat.event deltas are still blocked by the skip check in handleChatEvent.
-    // Regular turns always reset to allow chat.event fallback rendering.
-    if (!this.channelTurnActive) {
-      this.currentStreamMsgId = null;
-    }
+    // Always reset streaming state so the next turn gets a fresh msg_id.
+    // Late chat.event deltas during channel turns are blocked by the
+    // channelTurnActive flag in handleChatEvent, not by currentStreamMsgId.
+    this.currentStreamMsgId = null;
     this.accumulatedAssistantText = '';
 
     if (this.onSignalEvent) {
