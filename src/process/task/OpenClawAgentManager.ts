@@ -213,6 +213,30 @@ class OpenClawAgentManager extends BaseAgentManager<OpenClawAgentManagerData> {
     try {
       await this.bootstrap;
 
+      // Persist user message to DB and emit to BOTH frontend streams
+      // so AionUI renders the channel user's message in the conversation
+      if (data.msg_id && data.content) {
+        const userMessage: TMessage = {
+          id: data.msg_id,
+          msg_id: data.msg_id,
+          type: 'text',
+          position: 'right',
+          conversation_id: this.conversation_id,
+          content: { content: data.content },
+          createdAt: Date.now(),
+        };
+        addMessage(this.conversation_id, userMessage);
+
+        const userContentMsg: IResponseMessage = {
+          type: 'user_content',
+          conversation_id: this.conversation_id,
+          msg_id: data.msg_id,
+          data: data.content,
+        };
+        ipcBridge.openclawConversation.responseStream.emit(userContentMsg);
+        ipcBridge.conversation.responseStream.emit(userContentMsg);
+      }
+
       const result = await this.agent.sendChannelMessage(data.content);
       if (result.success === false) {
         throw new Error(result.error.message || 'Failed to send channel message');

@@ -4,10 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ipcBridge } from '@/common';
 import WorkerManage from '@/process/WorkerManage';
 import { getDatabase } from '@/process/database';
-import { addMessage } from '@process/message';
 import type BaseAgentManager from '@/process/task/BaseAgentManager';
 import type OpenClawAgentManager from '@/process/task/OpenClawAgentManager';
 import { composeMessage, transformMessage, type TMessage } from '../../common/chatLib';
@@ -193,31 +191,6 @@ export class ChannelMessageService {
       throw error;
     }
 
-    // For OpenClaw: persist user message to DB and emit to openclawConversation stream.
-    // sendChannelMessage uses a separate session key so OpenClawAgentManager won't
-    // handle user message persistence — we do it here.
-    // Non-OpenClaw agents (Gemini/ACP/Codex) already handle user message display
-    // through their own sendMessage flow, so no extra IPC emission is needed.
-    if (isOpenClaw) {
-      const userMessage: TMessage = {
-        id: msgId,
-        msg_id: msgId,
-        type: 'text',
-        position: 'right',
-        conversation_id: conversationId,
-        content: { content: message },
-        createdAt: Date.now(),
-      };
-      addMessage(conversationId, userMessage);
-
-      ipcBridge.openclawConversation.responseStream.emit({
-        type: 'user_content',
-        conversation_id: conversationId,
-        msg_id: msgId,
-        data: message,
-      });
-    }
-
     return new Promise((resolve, reject) => {
       // 注册流状态
       // Register stream state
@@ -235,7 +208,7 @@ export class ChannelMessageService {
       // OpenClaw: use sendChannelMessage (separate session key to avoid rs_ 404).
       // Gateway broadcasts the response to all WebSocket clients, so the main
       // OpenClawAgentManager receives and renders it automatically via channelEventBus.
-      const sendPromise = isOpenClaw ? (task as OpenClawAgentManager).sendChannelMessage({ content: message }) : task.sendMessage(task.type === 'gemini' ? { input: message, msg_id: msgId } : { content: message, msg_id: msgId });
+      const sendPromise = isOpenClaw ? (task as OpenClawAgentManager).sendChannelMessage({ content: message, msg_id: msgId }) : task.sendMessage(task.type === 'gemini' ? { input: message, msg_id: msgId } : { content: message, msg_id: msgId });
 
       sendPromise.catch((error: Error) => {
         const errorMessage = `Error: ${error.message || 'Failed to send message'}`;
