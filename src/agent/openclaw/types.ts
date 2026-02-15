@@ -270,6 +270,8 @@ export interface OpenClawGatewayConfig {
   useExternalGateway?: boolean;
   /** CLI path for spawning gateway (default: openclaw) */
   cliPath?: string;
+  /** Full WebSocket URL (e.g., wss://remote.example.com:18789). Overrides host/port. */
+  url?: string;
 }
 
 // ========== Gateway Client Options ==========

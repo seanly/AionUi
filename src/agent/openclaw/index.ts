@@ -15,7 +15,7 @@ import { AcpErrorType, createAcpError } from '@/types/acpTypes';
 import net from 'node:net';
 import { OpenClawGatewayConnection } from './OpenClawGatewayConnection';
 import { OpenClawGatewayManager } from './OpenClawGatewayManager';
-import { getGatewayAuthPassword, getGatewayAuthToken, getGatewayPort } from './openclawConfig';
+import { getGatewayAuthPassword, getGatewayAuthToken, getGatewayHost, getGatewayPort, getGatewayUrl } from './openclawConfig';
 import type { ChatEvent, EventFrame, HelloOk, OpenClawGatewayConfig } from './types';
 
 async function isTcpPortOpen(host: string, port: number, timeoutMs = 300): Promise<boolean> {
@@ -103,9 +103,17 @@ export class OpenClawAgent {
       this.emitStatusMessage('connecting');
 
       const gatewayConfig: OpenClawGatewayConfig = this.config.gateway || { port: 18789 };
-      const useExternal = gatewayConfig.useExternalGateway ?? false;
       const port = gatewayConfig.port || getGatewayPort();
-      const host = gatewayConfig.host || 'localhost';
+      const host = gatewayConfig.host || getGatewayHost() || 'localhost';
+
+      // Determine whether to use an external gateway:
+      // explicit flag > auto-infer from url or remote host presence
+      const isRemoteHost = host !== 'localhost' && host !== '127.0.0.1';
+      const useExternal = gatewayConfig.useExternalGateway ?? (!!gatewayConfig.url || !!getGatewayUrl() || isRemoteHost);
+
+      // Resolve WebSocket URL: when external, prefer explicit url > config file url;
+      // when local, always connect to host:port (ignore remote url from config)
+      const gatewayUrl = useExternal ? gatewayConfig.url || getGatewayUrl() || `ws://${host}:${port}` : `ws://${host}:${port}`;
 
       // Auto-load token/password from OpenClaw config if not explicitly provided
       const token = gatewayConfig.token ?? getGatewayAuthToken() ?? undefined;
@@ -138,11 +146,13 @@ export class OpenClawAgent {
             throw new Error(`Failed to start OpenClaw Gateway: ${errorMsg}`);
           }
         }
+      } else {
+        console.log(`[OpenClawAgent] Using external gateway at ${gatewayUrl}`);
       }
 
       // Create and configure connection
       this.connection = new OpenClawGatewayConnection({
-        url: `ws://${host}:${port}`,
+        url: gatewayUrl,
         token,
         password,
         onEvent: (evt) => this.handleEvent(evt),

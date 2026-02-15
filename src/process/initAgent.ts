@@ -153,6 +153,7 @@ export const createOpenClawAgent = async (options: ICreateConversationParams): P
       customWorkspace,
       gateway: {
         cliPath: extra.cliPath,
+        ...extra.gateway,
       },
       runtimeValidation: {
         expectedWorkspace: workspace,

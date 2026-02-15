@@ -27,7 +27,9 @@ interface OpenClawGatewayAuth {
 }
 
 interface OpenClawGatewayConfig {
+  host?: string;
   port?: number;
+  url?: string;
   auth?: OpenClawGatewayAuth;
 }
 
@@ -167,4 +169,20 @@ export function getGatewayPort(): number {
     return port;
   }
   return 18789; // Default port
+}
+
+/**
+ * Get gateway host from config
+ */
+export function getGatewayHost(): string | null {
+  const config = readOpenClawConfig();
+  return config?.gateway?.host ?? null;
+}
+
+/**
+ * Get gateway full URL from config (e.g., ws://192.168.1.100:18789 or wss://remote.example.com)
+ */
+export function getGatewayUrl(): string | null {
+  const config = readOpenClawConfig();
+  return config?.gateway?.url ?? null;
 }
